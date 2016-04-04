@@ -1,12 +1,15 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 ## Loading and preprocessing the data
-```{r}
+
+```r
 library(ggplot2)
+```
+
+```
+## Warning: package 'ggplot2' was built under R version 3.2.4
+```
+
+```r
 activity <- read.csv("./activity/activity.csv")
 ```
 
@@ -15,22 +18,41 @@ activity <- read.csv("./activity/activity.csv")
 #
 
 #1. Calculate the steps taken per day
-```{r}
+
+```r
 stepsPerDay <- with(activity,tapply(steps,date,sum,na.rm=T))
 meanStepsPerDay <- mean(stepsPerDay)
 medianStepsPerDay <- median(stepsPerDay)
 ```
 
 #2. Histogram of the total number of steps taken each day
-```{r}
+
+```r
 par(mfrow=c(1,1))
 hist(stepsPerDay,col = "blue")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)
+
 #3. Mean and median of total steps per day
-```{r}
+
+```r
 print(paste("Mean steps per day:",round(meanStepsPerDay,0)))
+```
+
+```
+## [1] "Mean steps per day: 9354"
+```
+
+```r
 print(paste("Median steps per day:",round(medianStepsPerDay,0)))
+```
+
+```
+## [1] "Median steps per day: 10395"
+```
+
+```r
 plot(stepsPerDay, xlab="day",ylab="steps per day", main="Steps per day")
 abline(h=mean(stepsPerDay), col="red")
 abline(h=medianStepsPerDay, col="blue")
@@ -38,13 +60,16 @@ legend(x='topleft',legend=c("mean:","median:"),col=c("red","blue"),
   lwd=1,lty=c(1,1),pch=c(NA,NA) )
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)
+
 
 #
 # What is the average daily activity pattern?
 #
 
 #1. time series plot of average steps taken by 5 minute interval
-```{r}
+
+```r
 meanByInterval <- with(activity,tapply(steps,interval,mean,na.rm=T))
 plot.new()
 plot(unique(activity$interval),meanByInterval,type="l",
@@ -63,19 +88,27 @@ legend(x='topleft',legend=paste("On average, interval \n",
        lwd=1,lty=c(1),pch=c(NA), cex=.75, bty="n")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)
+
 #
 # Imputing missing values
 #
 
 #1. Calculate the number of missing values in the dataset
-```{r}
+
+```r
 missingVals <- sum(is.na(activity$steps))
 print(paste("There are",missingVals,"missing values in the dataset"))
 ```
 
+```
+## [1] "There are 2304 missing values in the dataset"
+```
+
 
 #2. Create imputed values using mean by interval
-```{r}
+
+```r
 missingIndx <- is.na(activity$steps) #boolean index of observations with NA
 missingIntervals <- as.character(activity[missingIndx,3]) #interval values for NA
 missingImputedVals <- meanByInterval[missingIntervals] #mean value for each NA
@@ -83,17 +116,24 @@ missingImputedVals <- meanByInterval[missingIntervals] #mean value for each NA
 
 
 #3. Create a new dataset with imputed values
-```{r}
+
+```r
 activityImputed <- activity #create a new dataset
 activityImputed[missingIndx,1] <- missingImputedVals #replace NA with imputed values
 ```
 
 #4. New histogram of steps taken each day, what is the impact of imputed values?
-```{r}
+
+```r
 stepsPerDayImputed <- with(activityImputed,tapply(steps,date,sum))
 meanStepsPerDayImputed <- mean(stepsPerDayImputed)
 medianStepsPerDayImputed <- median(stepsPerDayImputed)
 hist(stepsPerDayImputed,col = "blue")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png)
+
+```r
 meanDiff <- meanStepsPerDayImputed - meanStepsPerDay
 medianDiff <- medianStepsPerDayImputed - medianStepsPerDay
 
@@ -102,14 +142,33 @@ print(paste("After imputing values the mean is:",
             "A difference of",
             round(meanDiff,0),"or",
             paste(round(meanDiff/meanStepsPerDay*100,0),"%",sep="") ) )
+```
+
+```
+## [1] "After imputing values the mean is: 10766. A difference of 1412 or 15%"
+```
+
+```r
 print(paste("After imputing values the median is:",
             paste(round(medianStepsPerDayImputed,0),".",sep=""),
             "A difference of",
             round(medianDiff,0),"or",
             paste(round(medianDiff/medianStepsPerDay*100,0),"%",sep="") ) )
+```
+
+```
+## [1] "After imputing values the median is: 10766. A difference of 371 or 4%"
+```
+
+```r
 print("Imputing values has raised the mean and median")
+```
 
+```
+## [1] "Imputing values has raised the mean and median"
+```
 
+```r
 #
 # Are there differences in activity patterns between weekdays and weekends?
 #
@@ -127,4 +186,6 @@ activityImputed[weekDayIndx,"daytype"] <- as.factor("Weekday")
 ggplot(activityImputed) + geom_line(aes(interval,steps),
        stat="summary",fun.y="mean") + facet_grid(daytype~.)
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-9-2.png)
 
